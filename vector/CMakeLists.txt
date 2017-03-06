@@ -1,23 +1,22 @@
 cmake_minimum_required(VERSION 3.0)
-project(stack)
+project(vector)
 
 enable_testing()
 find_package(GTest REQUIRED)
 
-add_executable(stack_test
-	stack_test.cpp
+add_executable(vector_test
+	vector_test.cpp
 	debug_utils.cpp
 )
 
-target_compile_options(stack_test PUBLIC 
+target_compile_options(vector_test PUBLIC 
 	-pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused)
 
-
-target_compile_options(stack_test PUBLIC -g)
-target_include_directories(stack_test PUBLIC ${GTEST_INCLUDE_DIR})
-target_link_libraries(stack_test ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
+target_compile_options(vector_test PUBLIC -g)
+target_include_directories(vector_test PUBLIC ${GTEST_INCLUDE_DIR})
+target_link_libraries(vector_test ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
 
 add_test(
-	stack_test_exec
-	stack_test
+	vector_test_exec
+	vector_test
 )

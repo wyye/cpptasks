@@ -1,26 +1,16 @@
 #ifndef STACK_H
 #define STACK_H
 
+#include "../vector/vector.h"
+
 #include <iostream>
 #include <cstring>
 #include <string>
 #include <limits>
 
-struct StackEmpty : public std::runtime_error
-{
-	StackEmpty(std::string const& message) : 
-		std::runtime_error("StackEmpty: " + message)
-	{}
-};
-
-struct StackLarge : public std::runtime_error
-{
-	StackLarge(std::string const& message) : 
-		std::runtime_error("StackLarge: " + message)
-	{}
-};
-
-template <typename T>
+template <
+	typename T,
+	typename Container = Vector<T> >
 class Stack {
 public:
 	
@@ -29,148 +19,71 @@ public:
 	typedef T& reference;
 	typedef const T& const_reference;
 	
-	Stack() :
-		m_size(0),
-		m_capacity(0),
-		m_data(nullptr)
-	{
-	}
+	Stack()
+	{}
 	
 	Stack(Stack const& stack) :
-		m_size(stack.size()),
-		m_capacity(stack.capacity()),
-		m_data(new T[stack.capacity()])
-	{
-		memcpy(m_data, stack.m_data, stack.capacity());
-	}
+		m_container(stack.m_container)
+	{}
 	
 	Stack(Stack&& stack) : 
-		m_size(std::move(stack.m_size)),
-		m_capacity(std::move(stack.m_size))
-	{
-		m_data = stack.m_data;
-		stack.m_data = nullptr;
-	}
+		m_container(std::move(stack))
+	{}
 	
 	Stack operator=(const Stack& stack)
 	{
-		m_size = stack.size();
-		m_capacity = stack.capacity();
-		delete[] m_data;
-		m_data = new T[stack.capacity()];
-		memcpy(m_data, stack.m_data, stack.capacity());
+		m_container = stack.m_container;
 		return *this;
 	}
 	
 	Stack operator=(Stack&& stack) {
-		m_size = std::move(stack.m_size);
-		m_capacity = std::move(stack.m_capacity);
-		m_data = stack.m_data;
-		stack.m_data = nullptr;
-	}
-	
-	~Stack() {
-		if (m_data != nullptr)
-			delete[] m_data;
+		m_container = std::move(stack.m_container);
+		return *this;
 	}
 	
 	reference top() {
-		if (m_size == 0) {
-			throw StackEmpty("r top");
-		}
-		return m_data[m_size-1];
+		return m_container.back();
 	}
 		
 	const_reference top() const {
-		if (m_size == 0) {
-			throw StackEmpty("cr top");
-		}
-		return m_data[m_size-1];
+		return m_container.back();
 	}
 	
 	bool empty() const {
-		return !m_size;
+		return m_container.empty();
 	}
 	
 	size_type size() const {
-		return m_size;
+		return m_container.size();
 	}
 	
 	void push(const value_type& value) {
-		if (m_size == m_capacity) stretch();
-		m_size += 1;
-		m_data[m_size-1] = value;
+		m_container.push_back(value);
 	}
 	
 	void push(value_type&& value) {
-		if (m_size == m_capacity) stretch();
-		m_size += 1;
-		m_data[m_size-1] = std::move(value);
+		m_container.push_back(std::move(value));
 	}
 	
 	void pop() {
-		if (m_size == 0) {
-			throw StackEmpty("pop");
-		}
-		m_size -= 1;
+		m_container.pop_back();
 	}
 	
 	size_t capacity() const {
-		return m_capacity;
+		return m_container.capacity();
 	}
 	
-	void dump() const;
-	bool ok() const;
+	void dump() const {
+		return m_container.dump();
+	}
+	
+	bool ok() const {
+		return m_container.ok();
+	}
 	
 private:
-	void stretch();
 	
-	size_t m_size;
-	size_t m_capacity;
-	T* m_data;
+	Container m_container;
 };
-
-template <typename T>
-void Stack<T>::stretch() {
-	if (m_data == nullptr) {
-		m_capacity = 1;
-		m_size = 0;
-		m_data = new T[1];
-	} else {
-		if (std::numeric_limits<size_t>::max() / 2 <= m_capacity)
-			throw StackLarge("stretch");
-		size_t new_m_capacity = m_capacity * 2;
-		T* new_m_data = new T[new_m_capacity];
-		memcpy(new_m_data, m_data, m_capacity * sizeof(T));
-		memset(new_m_data+m_capacity, 0xFE, (new_m_capacity - m_capacity) * sizeof(T));
-		delete[] m_data;
-		m_data = new_m_data;
-		m_capacity = new_m_capacity;
-	}
-}
-
-template <typename T>
-void Stack<T>::dump() const {
-	std::cout << "class Stack<T> {" << std::endl;
-	std::cout << "\tsize = " << m_size << std::endl;
-	std::cout << "\tcapacity = " << m_capacity << std::endl;
-	std::cout << "\tdata [" << static_cast<void*>(m_data) << "] = {" << std::endl;
-	for (size_t i = 0; i < m_capacity; ++i) {
-		std::cout << "\t\t" << i << " [" << static_cast<void*>(&m_data[i]) << 
-			"] : ";
-		if (i >= m_size) 
-			std::cout << "GARBAGE ";
-		std::cout << m_data[i] << std::endl;
-	}
-	std::cout << "\t}" << std::endl;
-	std::cout << "}" << std::endl;
-}
-
-template <typename T>
-bool Stack<T>::ok() const {
-	bool check1 = m_size <= m_capacity;
-	bool check2 = (m_data == nullptr && m_capacity == 0) || (m_data != nullptr && m_capacity > 0);
-	return check1 && check2;
-}
 
 #endif
