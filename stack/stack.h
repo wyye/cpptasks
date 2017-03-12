@@ -30,13 +30,13 @@ public:
 		m_container(std::move(stack))
 	{}
 	
-	Stack operator=(const Stack& stack)
+	Stack& operator=(const Stack& stack)
 	{
 		m_container = stack.m_container;
 		return *this;
 	}
 	
-	Stack operator=(Stack&& stack) {
+	Stack& operator=(Stack&& stack) {
 		m_container = std::move(stack.m_container);
 		return *this;
 	}

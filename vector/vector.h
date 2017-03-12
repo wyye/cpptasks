@@ -46,12 +46,12 @@ public:
 	explicit Vector(size_type count) :
 		m_capacity(count),
 		m_size(count),
-		m_data(static_cast<pointer>(operator new[](sizeof(T) * count)))
+		m_data(static_cast<pointer>(operator new[](sizeof(T) * count, 0)))
 	{
 		DEBUG_ONLY(std::cerr << "Vector::Vector(size_type)" << std::endl);
 		for (size_type s = 0; s != count; ++s) {
 			try {
-				new (&m_data[s]) T(); 
+				new (&m_data[s]) T();
 			} catch (...) {
 				for (size_type s2 = 0; s2 != s; ++s2) {
 					m_data[s2].~T();
@@ -67,7 +67,7 @@ public:
 	Vector(const Vector& other) :
 		m_capacity(other.m_capacity),
 		m_size(other.m_size),
-		m_data(static_cast<pointer>(operator new[](sizeof(T) * m_capacity)))
+		m_data(static_cast<pointer>(operator new[](sizeof(T) * m_capacity, 0)))
 	{
 		DEBUG_ONLY(std::cerr << "Vector::Vector(const vector&)" << std::endl);
 		for (size_type s = 0; s != m_size; ++s) {
@@ -96,7 +96,7 @@ public:
 	Vector(std::initializer_list<T> ilist) :
 		m_capacity(ilist.size()),
 		m_size(ilist.size()),
-		m_data(static_cast<pointer>(operator new[](sizeof(T) * m_capacity)))
+		m_data(static_cast<pointer>(operator new[](sizeof(T) * m_capacity, 0)))
 	{
 		DEBUG_ONLY(std::cerr << "Vector::Vector(std::initializer_list<T>)" << std::endl);
 		auto it = ilist.begin();
@@ -126,8 +126,6 @@ public:
 	}
 	
 	Vector& operator=(Vector&& other) noexcept {
-		clear();
-		shrink_to_fit();
 		std::swap(*this, other);
 	}
 	
@@ -450,13 +448,13 @@ void Vector<T>::reserve(size_type new_cap) {
 	if (capacity() == 0) {
 		
 		DASSERT(m_data == nullptr, "Incorrect state");
-		m_data = static_cast<pointer>(operator new[](sizeof(T) * new_cap));
+		m_data = static_cast<pointer>(operator new[](sizeof(T) * new_cap, 0));
 		m_capacity = new_cap;
 		
 	} else {
 		
 		DASSERT(m_data != nullptr, "Incorrect state");
-		T* new_m_data = static_cast<pointer>(operator new[](sizeof(T) * new_cap));
+		T* new_m_data = static_cast<pointer>(operator new[](sizeof(T) * new_cap, 0));
 		std::memmove(new_m_data, m_data, m_size * sizeof(T));
 		operator delete[](m_data);
 		m_data = new_m_data;
@@ -486,7 +484,7 @@ void Vector<T>::shrink_to_fit() {
 	} else {
 		
 		DASSERT(m_data != nullptr, "incorrect state");
-		T* new_m_data = static_cast<pointer>(operator new[](sizeof(T) * m_size));
+		T* new_m_data = static_cast<pointer>(operator new[](sizeof(T) * m_size, 0));
 		std::memmove(new_m_data, m_data, sizeof(T) * m_size);
 		operator delete[](m_data);
 		m_data = new_m_data;

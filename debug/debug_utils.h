@@ -24,6 +24,8 @@ void vassert(
 #else
 #define DEBUG_ONLY(exp) exp
 #endif
+	
+void* operator new[](size_t size, int val);
 
 #endif // DEBUG_UTILS_H
 	

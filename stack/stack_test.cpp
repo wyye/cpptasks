@@ -50,11 +50,11 @@ TEST(Stack, TwoStacks) {
 
 TEST(Stack, LargeStack) {
 	Stack<int> s;
-	for (int i = 0; i != 1000000; ++i) {
+	for (int i = 0; i != 100; ++i) {
 		ASSERT_TRUE(s.ok());
 		s.push(i);
 	}
-	for (int i = 1000000; i != 0; --i) {
+	for (int i = 100; i != 0; --i) {
 		ASSERT_EQ(s.top(), i - 1);
 		ASSERT_TRUE(s.ok());
 		s.pop();
