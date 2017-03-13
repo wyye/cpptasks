@@ -76,9 +76,7 @@ TEST(Vector, Erase) {
 	ASSERT_EQ(v[0], 1);
 	ASSERT_EQ(v[1], 4);
 	Vector<int> v2;
-	std::cerr << "123";
 	std::swap(v, v2);
-	std::cerr << "456";
 }
 
 int main(int argc, char **argv) {
